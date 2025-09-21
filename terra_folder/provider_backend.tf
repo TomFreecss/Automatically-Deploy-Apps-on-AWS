@@ -4,10 +4,10 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = var.state_bucket      # da bootstrap
+    bucket         = "tomfreecss-terra-state"      # da bootstrap
     key            = "terraform.tfstate"
-    region         = var.region
-    dynamodb_table = var.lock_table
+    region         = "eu-west-1"
+    dynamodb_table = "terraform-lock"
     encrypt        = true
   }
 }
