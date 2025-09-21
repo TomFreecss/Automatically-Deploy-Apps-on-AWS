@@ -2,10 +2,10 @@ tasks:
   - name: Install Tools
     init: |
       # Install Terraform
-      wget https://releases.hashicorp.com/terraform/1.7.0/terraform_1.7.0_linux_amd64.zip
-      unzip terraform_1.7.0_linux_amd64.zip
+      wget https://releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_amd64.zip
+      unzip terraform_1.13.3_linux_amd64.zip
       sudo mv terraform /usr/local/bin/
-      rm terraform_1.7.0_linux_amd64.zip
+      rm terraform_1.13.3_linux_amd64.zip
 
       # Install AWS CLI v2
       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
