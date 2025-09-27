@@ -31,7 +31,7 @@ jobs:
     
     - name: Build and push Docker image
       run: |
-        cd app/src
+        cd app
         docker build -t demo-app:latest .
         docker tag demo-app:latest 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:latest
         docker push 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:latest
