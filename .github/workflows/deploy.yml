@@ -38,5 +38,7 @@ jobs:
     
     - name: Force ECS deployment
       run: |
-        # Get your cluster and service names (adjust these)
-        aws ecs update-service --cluster your-cluster-name --service demo-app --force-new-deployment --region eu-west-1
+       # Get the service name dynamically
+       SERVICE_NAME=$(aws ecs list-services --cluster demo-app --region eu-west-1 --query 'serviceArns[0]' --output text | cut -d'/' -f3)
+       echo "Updating service: $SERVICE_NAME"
+       aws ecs update-service --cluster demo-app --service $SERVICE_NAME --force-new-deployment --region eu-west-1
