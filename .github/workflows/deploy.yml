@@ -30,11 +30,37 @@ jobs:
       uses: aws-actions/amazon-ecr-login@v2
     
     - name: Build and push Docker image
+      env:
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-        cd app
-        docker build -t demo-app:latest .
-        docker tag demo-app:latest 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:latest
+        cd app  
+        
+        # Build with unique tag
+        docker build -t demo-app:$IMAGE_TAG .
+        docker tag demo-app:$IMAGE_TAG 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:$IMAGE_TAG
+        
+        # Also tag as latest
+        docker tag demo-app:$IMAGE_TAG 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:latest
+        
+        # Push both tags
+        docker push 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:$IMAGE_TAG
         docker push 831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:latest
+
+- name: Update ECS service with new image
+  env:
+    IMAGE_TAG: ${{ github.sha }}
+  run: |
+    # Update task definition to use the new image tag
+    TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition demo-app --region eu-west-1 --query 'taskDefinition' --output json | jq 'del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.placementConstraints) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
+    
+    # Update the image URI in the task definition
+    NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "831926585199.dkr.ecr.eu-west-1.amazonaws.com/demo-app:$IMAGE_TAG" '.containerDefinitions[0].image = $IMAGE')
+    
+    # Register new task definition
+    aws ecs register-task-definition --region eu-west-1 --cli-input-json "$NEW_TASK_DEF"
+    
+    # Update service to use new task definition
+    aws ecs update-service --cluster demo-app --service demo-app --task-definition demo-app --region eu-west-1
     
     - name: Force ECS deployment
       run: |
